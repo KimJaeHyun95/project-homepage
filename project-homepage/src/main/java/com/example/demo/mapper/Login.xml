@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.example.demo.mapper.Login_mapper">
+  
+	<select id="idCheck" resultType="com.example.demo.VO.LoginVO">
+		SELECT * FROM login_tb WHERE uid = #{id}
+	</select>
+	
+	<select id="phoneCheck" resultType="com.example.demo.VO.LoginVO">
+		SELECT * FROM login_tb WHERE phone = #{phone}
+	</select>
+ 
+ 	<insert id="create_account">
+		INSERT INTO login_tb VALUES(#{uid},#{upw},#{name}, #{phone})
+	</insert>
+	
+	<select id="login" resultType="com.example.demo.VO.LoginVO">
+		SELECT * FROM login_tb WHERE uid = #{uid} and upw = #{upw}
+	</select>
+ 	
+ 	<select id="idsearch" resultType="String">
+		SELECT uid FROM login_tb WHERE name = #{name} and phone = #{phone}
+	</select>
+ </mapper>
+  

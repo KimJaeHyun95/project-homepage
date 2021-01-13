@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.example.demo.mapper.Board_mapper">
+  
+  	<insert id="insert" parameterType="String">
+		INSERT INTO board_tb VALUES(NULL, #{author}, now(),#{title},#{contents},0,0,NULL)
+	</insert>
+	
+	<select id="getnum" resultType="Integer">
+		select last_insert_id()
+	</select>
+	
+	<insert id="attach">
+		INSERT INTO board_attach_tb VALUES(#{num},#{filename},#{filesize},#{file_exe},NULL)
+	</insert>
+	
+	<select id="getList" resultType="com.example.demo.VO.BoardVO">
+		WITH RECURSIVE tmp1 AS
+(
+   SELECT num, author, wdate, title, contents, hit, pnum, 
+   num as grpno,
+    CONCAT(REPEAT('0',(6-CHAR_LENGTH(CAST(num AS CHAR(30))))),CAST(num AS CHAR(30))) path,
+    1 AS lvl 
+    FROM board_tb WHERE pnum IS NULL
+    
+    UNION
+    
+    SELECT g.num, g.author, g.wdate, g.title, g.contents, g.hit, g.pnum,
+    t.grpno as grpno,
+    CONCAT(t.path,',',CONCAT(REPEAT('0',(6-CHAR_LENGTH(CAST(g.num AS CHAR(30))))),CAST(g.num AS CHAR(30)))) AS path, t.lvl+1 AS lvl
+    FROM tmp1 t JOIN board_tb g ON t.num=g.pnum
+)   SELECT num, author, wdate, CONCAT(REPEAT('> ', lvl), title) title, contents, hit, pnum, path, lvl
+      FROM tmp1
+      
+      ORDER BY grpno DESC, path
+	</select>
+	
+	<update id="countUpdate" parameterType="com.example.demo.VO.BoardVO">
+        UPDATE board_tb SET hit = hit + 1 WHERE num=#{num}
+	</update>
+   
+	<select id="select" resultType="com.example.demo.VO.BoardVO">
+		SELECT * FROM board_tb WHERE num = #{num}
+	</select>
+	
+	<select id="selectatt" resultType="com.example.demo.VO.Board_attachVO">
+		SELECT * FROM board_attach_tb WHERE num=#{num}
+	</select>
+
+	<delete id="delete" >
+		DELETE FROM board_tb WHERE num=#{num}
+	</delete>
+	
+	<delete id="deleteatt">
+   		DELETE FROM board_attach_tb WHERE num=#{num} 
+   </delete>
+   
+   <update id="update">
+		UPDATE  board_tb SET title=#{title},contents=#{contents} WHERE num = #{num}
+	</update>
+	
+	<select id="search" resultType="com.example.demo.VO.BoardVO" parameterType="String">
+		SELECT * FROM board_tb WHERE ('title' LIKE #{sas} AND title LIKE CONCAT('%',#{sen},'%')) 
+		OR ('author' LIKE #{sas} AND author LIKE CONCAT('%',#{sen},'%')) ORDER BY num DESC
+	</select>
+	
+	<insert id="comment">
+		INSERT INTO board_tb VALUES(NULL, #{author}, curdate(),#{title},#{contents},0,0,#{pnum})
+	</insert>
+	
+    <delete id="deleteoneatt">
+   		DELETE FROM board_attach_tb WHERE num=#{num} AND filename = #{filename}
+   </delete>
+   
+   <insert id="like">
+		INSERT INTO like_tb VALUES(#{num},#{id})
+	</insert>
+	
+	<update id="likec">
+		UPDATE  board_tb SET like_n = like_n + 1 WHERE num = #{num} 
+	</update>
+	
+	 <delete id="like_cancle">
+		delete from like_tb where num = #{num} and id = #{id}
+	</delete>
+	
+	<update id="likec_cancle">
+		UPDATE  board_tb SET like_n = like_n - 1 WHERE num = #{num} 
+	</update>
+	
+	<select id="didlike" resultType="int">
+		SELECT EXISTS (SELECT * FROM like_tb WHERE num = #{num} and id = #{id}) AS success;
+	</select>
+	
+	<select id="select_for_down" resultType="String">
+		SELECT filename FROM board_attach_tb WHERE u_num=#{u_num}
+	</select>
+	
+	<select id="didhit" resultType="int">
+		SELECT EXISTS (SELECT * FROM hit_tb WHERE ip = #{ip} and hit_date=curdate() and board_num=#{num}) AS success;
+	</select>
+	
+	<insert id="addhit">
+		INSERT INTO hit_tb VALUES(#{ip}, curdate(), #{num});
+	</insert>
+	
+	<select id="like_n" resultType="int">
+		SELECT like_n from board_tb where num= #{num};
+	</select>
+	
+  </mapper>
+  

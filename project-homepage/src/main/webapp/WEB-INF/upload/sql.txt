@@ -1,0 +1,115 @@
+SQL
+- DDL : Data Definition Language(데이터 정의어)		: create ~
+- DML : Data MAnipulation Language(데이터 조작어)	: select, insert, update, delete ~
+- DCL : Data Control Language(트랜잭션 제어)		:  ~
+
+load data local infile ‘/path/pet.txt’ into table pet;
+
+
+INSERT　INTO　pet
+VALUES ( ‘~~~’, ‘~~~’, ‘f’, ‘1999-03-30’,NULL);
+
+
+
+mysql --local-infile=1  -u root –p
+
+load data local infile 'C:\\test\\emp.csv' into table emp fields terminated by ',' lines terminated by '\r\n';
+
+select distinct deptno from emp;
+
+select empono, ename, hiredate from emp order by hiredate DESC;
+
+ select empono, ename, hiredate from emp order by hiredate;
+
+select empono, deptno, hiredate from emp order by deptno, hiredate DESC;
+
+select ename, hiredate, curdate(), timestampdiff(year, hiredate, curdate()) AS "근무연수" from emp;
+
+select ename, deptno/2 as ref from emp;
+
+select count(*) from (select distinct deptno from emp) e;
+select count(*) as "부서의 수" from (select distinct deptno from emp) e;
+
+
+select empono, ename, hiredate from emp where deptno<> 2 and hiredate > 20170101;
+
+select empono, ename, hiredate  from emp where Month(hiredate)=1;
+
+select month(date_add(curdate(), interval 1 month));
+
+select mod(month(curdate()),12);
+
+select 1 is not null;
+
+select * from emp where ename like '%j%';
+
+mysql> select * from emp where ename like '_j_';
+
+Regular Expression = REGEXP+LIKE()
+[...] 한 문자로 취급(아래 예)
+[abc] a,b,c 중 어느한 문자와 매칭 [a-z]
+[0-9]* 0-9까지 숫자중에 0개 이상 매칭
+x* x가 0개 혹은 여러개
+.* 한개의 문자가 0개 혹은 여러개
+^정규표현 식에서 문자열 앞에 오면 문자열의 시작을 의미한다.
+$정규표현 식에서 문자열 뒤에 오면 문자열의 끝을 의미한다. fy$ -> 문자열의 끝이 fy인 것
+
+
+select *from emp where REGEXP_LIKE(ename,'^k');
+
+select deptno, count(*) from emp group by deptno;
+
+
+select deptno as "부서번호", count(*) as "인원" from emp group by deptno;
+
+select deptno as "부서", count(*) as "인원" from emp group by deptno order by 부서 DESC;
+
+select e.ename, d.name from emp e inner join dname d on e.deptno = d.dno;
+
+insert into dname  values(7, '개발팀');
+
+select e.ename, d.name from emp e left outer join dname d on e.deptno = d.dno;
+
+REFERRNCES table_name(field_name)
+
+create table location1(empono int primary key,name varchar(20) not null,foreign key(empono) references emp(empono));
+
+create table location2(empono int primary key,name varchar(20) not null,foreign key(empono) references emp(empono) on delete cascade);
+
+cascade		단계적으로 수행한다.
+set null		값만지우기
+no action		
+set default	
+restrict		삭제하지 마세요?
+
+select @last := last_insert_id()		테이블 내에 오토인크리먼트(테이블 내에 하나 여야 한다.)로 삽입된 값만 받아온다.
+
+상관관계 하위질의
+select * from t1
+where column1 = 
+(
+select column1 from t2
+where t2.column2 = t1.column2
+);
+
+페이지 나누기
+select * from emp  limit 2;
+
+
+select emp.*, @rownum:=@rownum +1 AS rank  from emp, (select @rownum :=0)r;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
